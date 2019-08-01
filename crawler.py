@@ -21,7 +21,7 @@ def upload_file(file_name, bucket, object_name=None):
     # Upload the file
     s3_client = boto3.client('s3')
     try:
-        response = s3_client.upload_file(file_name, bucket, object_name)
+        response = s3_client.upload_file(file_name, bucket, object_name, ExtraArgs={"ACL": "public-read", 'ContentType': "text/html"})
     except ClientError:
         return False
     return True
@@ -33,15 +33,26 @@ def crawl(event, context):
 
     subreddit = reddit.subreddit('summonerswar')
 
-    embeded = ''
+    embededList = []
 
-    for submission in subreddit.search("withhive.me", limit=50):
+    for submission in subreddit.search("withhive.me", sort='recent', time_filter='month', limit=20):
         if 'withhive.me/313/' in submission.selftext:
 
-            embeded += '<blockquote class="reddit-card" data-card-created="'+ str(time.time()).split(':')[0] +'">'\
-            '<a href="' + submission.url + '/?ref=share&ref_source=embed">' + submission.title + '</a>'\
+            embededList.append('<blockquote class="reddit-card" data-card-created="'+ str(time.time()).split(':')[0] +'">'\
+            '<a href="' + submission.url + '?ref=share&ref_source=embed">' + submission.title + '</a>'\
             'from <a href="http://www.reddit.com/r/summonerswar">Summoners War</a></blockquote>'\
-            '<script async src="https://embed.redditmedia.com/widgets/platform.js" charset="UTF-8"></script><br /><br />' 
+            '<script async src="https://embed.redditmedia.com/widgets/platform.js" charset="UTF-8"></script><br /><br />')
+
+        for comment in submission.comments:
+            if 'withhive.me/313/' in comment.body:
+                embededList.append('<a class="embedly-card" href="https://www.reddit.com' + comment.permalink + '">Card</a>'\
+                '<script async src="//embed.redditmedia.com/widgets/platform.js" charset="UTF-8"></script>')
+
+
+    embeded = '<html><head><title>Code Tendanci.eu</title></head><body>'
+    for post in embededList[::-1]:
+        embeded += post
+    embeded += '</body></html>'
 
     with open("/tmp/index.html", 'w') as f:
         f.write(embeded)
