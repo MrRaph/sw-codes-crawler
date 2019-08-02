@@ -18,7 +18,7 @@ innerHTML = browser.execute_script("return document.body.innerHTML")
 
 soup = BeautifulSoup.BeautifulSoup(innerHTML, 'lxml')
 
-embeded = '<html><head><title>Events Tendanci.eu</title></head><body>'
+embeded = '<html>'
 embeded += '<head><style type="text/css">@charset "UTF-8";[ng\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.ng-hide{display:none !important;}ng\:form{display:block;}</style>'\
         '    <!--[if lte IE 7]>'\
         '     <script src="http://cdnjs.cloudflare.com/ajax/libs/json2/20130526/json2.js"></script>'\
@@ -50,7 +50,7 @@ embeded += '<head><style type="text/css">@charset "UTF-8";[ng\:cloak],[ng-cloak]
         '    <!-- for weibo -->'\
         '    <meta property="wb:webmaster" content="004a156e336d778e">'\
         ''\
-        '   <title> HIVE: Mobile Gaming\'s Home Sweet Home! </title>'\
+        '   <title>Event Tendanci.eu</title>'\
         '<!--<script type="text/javascript" src="//image-glb.qpyou.cn/hubweb/pcweb/20190620000000/js/external/jquery-1.7.2.min.js?31"></script>-->'\
         '   <script type="text/javascript" async="" src="https://www.google-analytics.com/analytics.js"></script><script type="text/javascript" src="//image-glb.qpyou.cn/hubweb/pcweb/20190620000000/js/external/jquery-1.7.2.min.js?1443170166"></script>'\
         '   '\
@@ -86,7 +86,7 @@ embeded += '<head><style type="text/css">@charset "UTF-8";[ng\:cloak],[ng-cloak]
         '            gtag(\'config\', \'UA-106958063-1\');'\
         '        </script>'\
         '    '\
-        '</head>'\
+        '</head><body><br /><br /><center><div style="width: 75%;">'\
 
 
 for link in soup.find_all('a'):
@@ -98,6 +98,6 @@ for link in soup.find_all('a'):
                     embeded += str(soupEvent.find_all('div', class_='notice_view')[0])
 
 
-embeded += '</body></html>'
+embeded += '</div></center></body></html>'
 with open("/tmp/events.html", 'w') as f:
             f.write(embeded)
