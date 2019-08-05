@@ -1,6 +1,5 @@
 import praw
 import os
-import re
 import time
 import boto3
 from botocore.exceptions import ClientError
@@ -49,7 +48,17 @@ def crawl(event, context):
                 '<script async src="//embed.redditmedia.com/widgets/platform.js" charset="UTF-8"></script>')
 
 
-    embeded = '<html><head><title>Code Tendanci.eu</title></head><body>'
+    embeded = '<html><head><title>Code Tendanci.eu</title>'\
+   ' <!-- Global site tag (gtag.js) - Google Analytics -->'\
+    '<script async src="https://www.googletagmanager.com/gtag/js?id=UA-145085111-1"></script>'\
+    '<script>'\
+    'window.dataLayer = window.dataLayer || [];'\
+    'function gtag(){dataLayer.push(arguments);}'\
+    'gtag(\'js\', new Date());'\
+    'gtag(\'config\', \'UA-145085111-1\');'\
+    '</script>'\
+    '</head><body>'
+    
     for post in embededList[::-1]:
         embeded += post
     embeded += '</body></html>'
