@@ -92,7 +92,7 @@ embeded += '<head><style type="text/css">@charset "UTF-8";[ng\:cloak],[ng-cloak]
 for link in soup.find_all('a'):
 	if '/help/notice_view/' in link.get('href') and 'Event' in str(link):
 		if 'ummoner' in str(link):
-                    urls = re.findall('/(?:[-\w.]|(?:%[\da-fA-F]{2}))+', url)
+                    # urls = re.findall('https://www.withhive.com(?:[-\w.]|(?:%[\da-fA-F]{2}))+', url)
                     r = requests.get('https://www.withhive.com' + link['href'])
                     soupEvent = BeautifulSoup.BeautifulSoup(r.content, 'lxml')
                     embeded += str(soupEvent.find_all('div', class_='notice_view')[0])

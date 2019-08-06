@@ -18,8 +18,13 @@ provider:
       Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "CodesTendancieuBucket" } ] ]  }
     - Effect: "Allow"
       Action:
-        - "cloudfront:CreateInvalidation"
-      Resource: "*"
+        - "SNS:Publish"
+      Resource: '*'
+    - Effect: "Allow"
+      Action:
+        - "sns:"
+      Resource: 
+        - "Ref" : "CodeSnsTopic"
     - Effect: "Allow"
       Action:
         - "s3:PutObject"
@@ -42,10 +47,16 @@ functions:
       reddit_client_secret: ${file(./config.json):reddit_client_secret}
       distribution_id: ${file(./config.json):distribution_id}
       bucket: "sw-codes-tendancieu-eu-west-1"
+      target_arn: ${file(./config.json):target_arn}
 
 # you can add CloudFormation resource templates here
 resources:
  Resources:
+  CodeSnsTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        DisplayName: 'SW code notif'
+        TopicName: sw-code-notif-topic
   CrawlLogGroup:
       Type: AWS::Logs::LogGroup
       Properties: 
