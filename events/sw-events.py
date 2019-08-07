@@ -14,6 +14,10 @@ import mmap
 import sys
 import http.client
 
+import json
+from urllib import request
+from urllib.error import HTTPError
+
 session = boto3.Session(profile_name='sw')
 
 def tail( f, lines=20 ):
@@ -66,28 +70,60 @@ def upload_file(file_name, bucket, object_name=None):
     return True
 
 
-def sendDiscord( message, webhook ):
+def sendDiscord( title, message, url, webhook ):
  
-    # compile the form data (BOUNDARY can be anything)
-    formdata = "------:::BOUNDARY:::\r\nContent-Disposition: form-data; name=\"content\"\r\n\r\n" + message + "\r\n------:::BOUNDARY:::--"
+    # # compile the form data (BOUNDARY can be anything)
+    # formdata = "------:::BOUNDARY:::\r\nContent-Disposition: form-data; name=\"content\"\r\n\r\n" + message + "\r\n------:::BOUNDARY:::--"
   
-    # get the connection and make the request
-    connection = http.client.HTTPSConnection("discordapp.com")
+    # # get the connection and make the request
+    # connection = http.client.HTTPSConnection("discordapp.com")
+
+    # try:
+    #     connection.request("POST", webhook, formdata, {
+    #         'content-type': "multipart/form-data; boundary=----:::BOUNDARY:::",
+    #         'cache-control': "no-cache",
+    #         })
+    # except:
+    #     pass
+  
+    # # get the response
+    # response = connection.getresponse()
+    # result = response.read()
+  
+    # # return back to the calling function with the result
+    # return result.decode("utf-8")
+
+    payload = {
+        'content': message,
+        'embeds': [
+            {
+                'title': title,  # Le titre de la carte
+                'description': message,  # Le corps de la carte
+                'url': url,  # Si vous voulez faire un lien
+            },
+        ]
+    }
+
+    headers = {
+        'Content-Type': 'application/json',
+        'user-agent': 'Mozilla/5.0 (X11; U; Linux i686) Gecko/20071127 Firefox/2.0.0.11'
+    }
+
+    req = request.Request(url=webhook,
+                      data=json.dumps(payload).encode('utf-8'),
+                      headers=headers,
+                      method='POST')
 
     try:
-        connection.request("POST", webhook, formdata, {
-            'content-type': "multipart/form-data; boundary=----:::BOUNDARY:::",
-            'cache-control': "no-cache",
-            })
-    except:
-        pass
-  
-    # get the response
-    response = connection.getresponse()
-    result = response.read()
-  
-    # return back to the calling function with the result
-    return result.decode("utf-8")
+        response = request.urlopen(req)
+        print(response.status)
+        print(response.reason)
+        print(response.headers)
+    except HTTPError as e:
+        print('ERROR')
+        print(e.reason)
+        print(e.hdrs)
+        print(e.file.read())
 
 chrome_options = Options()
 chrome_options.add_argument('--headless')
@@ -210,7 +246,7 @@ with open('/tmp/history_events__23456765432.txt', 'rb', 0) as file, mmap.mmap(fi
         else:
             print('false ' + event['link'])
             print('Nouvel event : ' + str(event['title']) + ' // ' + str(event['link']))
-            sendDiscord('Nouvel event : ' + str(event['title']) + ' // ' + str(event['link']), os.environ["discord_aldanet_webhook"])
+            sendDiscord('Nouvel event !', str(event['title']), str(event['link']), os.environ["discord_aldanet_webhook"])
             # sendDiscord('Nouveau code : ' + str(link) + ' // Code OldSchool : ' + str(link).replace('https://withhive.me/313/', '').replace('http://withhive.me/313/', '').replace(')', '').replace('(', ''), os.environ["discord_unicorn_webhook"])
             messageCount += 1
 
@@ -219,7 +255,7 @@ with open('/tmp/history_events__23456765432.txt', 'rb', 0) as file, mmap.mmap(fi
 
 
 if messageCount > 0:
-    sendDiscord('@everyone v\'la des events tout neufs ! :-)', os.environ["discord_aldanet_webhook"])
+    sendDiscord('', '@everyone v\'la des events tout neufs ! :-)', '', os.environ["discord_aldanet_webhook"])
     # sendDiscord('@here v\'la des codes tout neufs ! :-)', os.environ["discord_unicorn_webhook"])
 
 f.close
