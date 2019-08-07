@@ -70,7 +70,7 @@ def upload_file(file_name, bucket, object_name=None):
     return True
 
 
-def sendDiscord( title, message, url, webhook ):
+def sendDiscord( title, message, message_embeds, url, webhook ):
  
     # # compile the form data (BOUNDARY can be anything)
     # formdata = "------:::BOUNDARY:::\r\nContent-Disposition: form-data; name=\"content\"\r\n\r\n" + message + "\r\n------:::BOUNDARY:::--"
@@ -98,7 +98,7 @@ def sendDiscord( title, message, url, webhook ):
         'embeds': [
             {
                 'title': title,  # Le titre de la carte
-                'description': message,  # Le corps de la carte
+                'description': message_embeds,  # Le corps de la carte
                 'url': url,  # Si vous voulez faire un lien
             },
         ]
@@ -246,7 +246,7 @@ with open('/tmp/history_events__23456765432.txt', 'rb', 0) as file, mmap.mmap(fi
         else:
             print('false ' + event['link'])
             print('Nouvel event : ' + str(event['title']) + ' // ' + str(event['link']))
-            sendDiscord('', str(event['title']), str(event['link']), os.environ["discord_aldanet_webhook"])
+            sendDiscord('', str(event['title']), str(event['title']), str(event['link']), os.environ["discord_aldanet_webhook"])
             # sendDiscord('Nouveau code : ' + str(link) + ' // Code OldSchool : ' + str(link).replace('https://withhive.me/313/', '').replace('http://withhive.me/313/', '').replace(')', '').replace('(', ''), os.environ["discord_unicorn_webhook"])
             messageCount += 1
 
@@ -255,7 +255,7 @@ with open('/tmp/history_events__23456765432.txt', 'rb', 0) as file, mmap.mmap(fi
 
 
 if messageCount > 0:
-    sendDiscord('', '@everyone v\'la des events tout neufs ! :-)', '', os.environ["discord_aldanet_webhook"])
+    sendDiscord('', '@everyone v\'la des events tout neufs ! :-)', '', '', os.environ["discord_aldanet_webhook"])
     # sendDiscord('@here v\'la des codes tout neufs ! :-)', os.environ["discord_unicorn_webhook"])
 
 f.close
