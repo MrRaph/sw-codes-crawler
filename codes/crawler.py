@@ -2,9 +2,11 @@ import praw
 import os
 import time
 import boto3
+from botocore.exceptions import ClientError
 import re
 import mmap
-from botocore.exceptions import ClientError
+import sys
+import http.client
 
 def tail( f, lines=20 ):
     total_lines_wanted = lines
@@ -53,6 +55,29 @@ def upload_file(file_name, bucket, object_name=None):
     except ClientError:
         return False
     return True
+
+def sendDiscord( message, webhook ):
+ 
+    # compile the form data (BOUNDARY can be anything)
+    formdata = "------:::BOUNDARY:::\r\nContent-Disposition: form-data; name=\"content\"\r\n\r\n" + message + "\r\n------:::BOUNDARY:::--"
+  
+    # get the connection and make the request
+    connection = http.client.HTTPSConnection("discordapp.com")
+
+    try:
+        connection.request("POST", webhook, formdata, {
+            'content-type': "multipart/form-data; boundary=----:::BOUNDARY:::",
+            'cache-control': "no-cache",
+            })
+    except:
+        pass
+  
+    # get the response
+    response = connection.getresponse()
+    result = response.read()
+  
+    # return back to the calling function with the result
+    return result.decode("utf-8")
 
 def crawl(event, context):
     reddit = praw.Reddit(client_id=os.environ['reddit_client_id'],
@@ -111,30 +136,45 @@ def crawl(event, context):
     upload_file("/tmp/index.html", os.environ['bucket'], "index.html")
     
     try:
-        boto3.client('s3').download_file(os.environ['bucket'], 'history__23456765432.txt', '/tmp/history__23456765432.txt')
+        boto3.client('s3').download_file(os.environ['bucket'], 'history_codes__23456765432.txt', '/tmp/history_codes__23456765432.txt')
     except:
-        pass
+        f = open('/tmp/history_codes__23456765432.txt', 'w') # to clear the file
+        f.write('NEW')
+        f.close()
 
-    f = open('/tmp/history__23456765432.txt', "a+")
+    f = open('/tmp/history_codes__23456765432.txt', "a+")
 
-    with open('/tmp/history__23456765432.txt', 'rb', 0) as file, mmap.mmap(file.fileno(), 0, access=mmap.ACCESS_READ) as s:
+    with open('/tmp/history_codes__23456765432.txt', 'rb', 0) as file, mmap.mmap(file.fileno(), 0, access=mmap.ACCESS_READ) as s:
+
+        messageCount = 0
+
         for link in links:
             if s.find(bytes(link, encoding='utf-8')) != -1:
                 print('true ' + link)
             else:
                 print('false ' + link)
                  # SNS Notify
-                sns = boto3.client('sns', region_name='eu-west-1')
-                sns.publish(PhoneNumber=os.environ['target_arn'], Message=str(link), Subject='New SW Code')
+                #sns = boto3.client('sns', region_name='eu-west-1')
+                #sns.publish(PhoneNumber=os.environ['target_arn'], Message=str(link), Subject='New SW Code')
+
+                sendDiscord('Nouveau code : ' + str(link), os.environ["discord_aldanet_webhook"])
+                sendDiscord('Nouveau code : ' + str(link), os.environ["discord_unicorn_webhook"])
+                messageCount += 1
+
                 # File append
                 f.write("%s\r\n" % link)
+
+        if messageCount > 0:
+            sendDiscord('@everyone v\'la des codes tout neufs ! :-)', os.environ["discord_aldanet_webhook"])
+            sendDiscord('@here v\'la des codes tout neufs ! :-)', os.environ["discord_unicorn_webhook"])
+
     f.close
-    f = open('/tmp/history__23456765432.txt', "r")
+    f = open('/tmp/history_codes__23456765432.txt', "r")
     tailed = tail(f, lines=50)
     f.close()
-    f = open('/tmp/history__23456765432.txt', 'w') # to clear the file
+    f = open('/tmp/history_codes__23456765432.txt', 'w') # to clear the file
     f.write(tailed)
     f.close()
-    upload_file("/tmp/history__23456765432.txt", os.environ['bucket'], "history__23456765432.txt")
+    upload_file("/tmp/history_codes__23456765432.txt", os.environ['bucket'], "history_codes__23456765432.txt")
 
 
