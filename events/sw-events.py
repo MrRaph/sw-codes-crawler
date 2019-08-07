@@ -242,7 +242,7 @@ f.close()
 f = open('/tmp/history_events__23456765432.txt', 'w') # to clear the file
 f.write(tailed)
 f.close()
-# upload_file("/tmp/history_events__23456765432.txt", os.environ['bucket'], "history_events__23456765432.txt")
+upload_file("/tmp/history_events__23456765432.txt", os.environ['bucket'], "history_events__23456765432.txt")
 
 
 
