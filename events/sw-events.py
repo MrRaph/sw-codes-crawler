@@ -255,7 +255,7 @@ with open('/tmp/history_events__23456765432.txt', 'rb', 0) as file, mmap.mmap(fi
 
 
 if messageCount > 0:
-    sendDiscord('', '@everyone v\'la des events tout neufs ! :-)', '', '', os.environ["discord_aldanet_webhook"])
+    sendDiscord('', '@everyone', 'v\'la des events tout neufs ! :-)', '', os.environ["discord_aldanet_webhook"])
     # sendDiscord('@here v\'la des codes tout neufs ! :-)', os.environ["discord_unicorn_webhook"])
 
 f.close
