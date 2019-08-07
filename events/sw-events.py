@@ -14,6 +14,8 @@ import mmap
 import sys
 import http.client
 
+session = boto3.Session(profile_name='sw')
+
 def tail( f, lines=20 ):
     total_lines_wanted = lines
 
@@ -56,7 +58,7 @@ def upload_file(file_name, bucket, object_name=None):
         object_name = file_name
 
     # Upload the file
-    s3_client = boto3.client('s3')
+    s3_client = session.client('s3')
     try:
         response = s3_client.upload_file(file_name, bucket, object_name, ExtraArgs={"ACL": "public-read", 'ContentType': "text/html"})
     except ClientError:
@@ -191,7 +193,7 @@ for link in soup.find_all('a'):
 # eventCount = 0
 
 try:
-    boto3.client('s3').download_file(os.environ['bucket'], 'history_events__23456765432.txt', '/tmp/history_events__23456765432.txt')
+    session.client('s3').download_file(os.environ['bucket'], 'history_events__23456765432.txt', '/tmp/history_events__23456765432.txt')
 except:
     f = open('/tmp/history_events__23456765432.txt', 'w') # to clear the file
     f.write('NEW')
