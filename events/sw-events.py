@@ -71,28 +71,6 @@ def upload_file(file_name, bucket, object_name=None):
 
 
 def sendDiscord( title, message, message_embeds, url, webhook ):
- 
-    # # compile the form data (BOUNDARY can be anything)
-    # formdata = "------:::BOUNDARY:::\r\nContent-Disposition: form-data; name=\"content\"\r\n\r\n" + message + "\r\n------:::BOUNDARY:::--"
-  
-    # # get the connection and make the request
-    # connection = http.client.HTTPSConnection("discordapp.com")
-
-    # try:
-    #     connection.request("POST", webhook, formdata, {
-    #         'content-type': "multipart/form-data; boundary=----:::BOUNDARY:::",
-    #         'cache-control': "no-cache",
-    #         })
-    # except:
-    #     pass
-  
-    # # get the response
-    # response = connection.getresponse()
-    # result = response.read()
-  
-    # # return back to the calling function with the result
-    # return result.decode("utf-8")
-
     payload = {
         'content': message,
         'embeds': [
@@ -245,8 +223,7 @@ with open('/tmp/history_events__23456765432.txt', 'rb', 0) as file, mmap.mmap(fi
             print('true ' + event['link'])
         else:
             print('false ' + event['link'])
-            print('Nouvel event : ' + str(event['title']) + ' // ' + str(event['link']))
-            sendDiscord('', str(event['title']), str(event['title']), str(event['link']), os.environ["discord_aldanet_webhook"])
+            sendDiscord(str(event['title']), 'Nouvel event !', str(event['title']), str(event['link']), os.environ["discord_aldanet_webhook"])
             # sendDiscord('Nouveau code : ' + str(link) + ' // Code OldSchool : ' + str(link).replace('https://withhive.me/313/', '').replace('http://withhive.me/313/', '').replace(')', '').replace('(', ''), os.environ["discord_unicorn_webhook"])
             messageCount += 1
 
@@ -265,7 +242,7 @@ f.close()
 f = open('/tmp/history_events__23456765432.txt', 'w') # to clear the file
 f.write(tailed)
 f.close()
-upload_file("/tmp/history_events__23456765432.txt", os.environ['bucket'], "history_events__23456765432.txt")
+# upload_file("/tmp/history_events__23456765432.txt", os.environ['bucket'], "history_events__23456765432.txt")
 
 
 
