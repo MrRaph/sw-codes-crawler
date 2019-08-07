@@ -3,8 +3,13 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 
 import re
+import os
 import requests
 import bs4 as BeautifulSoup
+
+import mmap
+import sys
+import http.client
 
 
 def sendDiscord( message, webhook ):
@@ -116,22 +121,22 @@ eventCount = 0
 
 for link in soup.find_all('a'):
 	if '/help/notice_view/' in link.get('href') and 'Event' in str(link):
-		if 'ummoner' in str(link):
-            # urls = re.findall('https://www.withhive.com(?:[-\w.]|(?:%[\da-fA-F]{2}))+', url)
-            r = requests.get('https://www.withhive.com' + link['href'])
+              if 'ummoner' in str(link):
+                # urls = re.findall('https://www.withhive.com(?:[-\w.]|(?:%[\da-fA-F]{2}))+', url)
+                r = requests.get('https://www.withhive.com' + link['href'])
 
-            print(link['href'])
+                print(link['href'])
 
-            soupEvent = BeautifulSoup.BeautifulSoup(r.content, 'lxml')
-            embeded += str(soupEvent.find_all('div', class_='notice_view')[0])
+                soupEvent = BeautifulSoup.BeautifulSoup(r.content, 'lxml')
+                embeded += str(soupEvent.find_all('div', class_='notice_view')[0])
 
-            eventCount +=1
-            sendDiscord('Nouvel event : ' + str(link), os.environ["discord_aldanet_webhook"])
-            # sendDiscord('Nouvel event : ' + str(link), os.environ["discord_unicorn_webhook"])
+                eventCount +=1
+                sendDiscord('Nouvel event : https://wwww.withhive.com' + str(link['href']), os.environ["discord_aldanet_webhook"])
+                # sendDiscord('Nouvel event : ' + str(link), os.environ["discord_unicorn_webhook"])
 
 if eventCount > 0:
-    sendDiscord('@everyone v\'la un nouvel event tout neuf ! :-)' + str(link), os.environ["discord_aldanet_webhook"])
-    # sendDiscord('Nouvel event : ' + str(link), os.environ["discord_unicorn_webhook"])
+    sendDiscord('@everyone v\'la un nouvel event tout neuf ! :-)', os.environ["discord_aldanet_webhook"])
+    #sendDiscord('@here v\'la un nouvel event tout neuf ! :-)', os.environ["discord_unicorn_webhook"])
 
                     
 
