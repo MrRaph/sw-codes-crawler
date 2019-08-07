@@ -204,9 +204,9 @@ messageCount = 0
 with open('/tmp/history_events__23456765432.txt', 'rb', 0) as file, mmap.mmap(file.fileno(), 0, access=mmap.ACCESS_READ) as s:
     for event in eventLinks:
         if s.find(bytes(event['link'], encoding='utf-8')) != -1:
-            print('true ' + event['link')
+            print('true ' + event['link'])
         else:
-            print('false ' + event['link')
+            print('false ' + event['link'])
 
             sendDiscord('Nouvel event : ' + str(event['title']) + ' // ' + str(event['link']), os.environ["discord_aldanet_webhook"])
             # sendDiscord('Nouveau code : ' + str(link) + ' // Code OldSchool : ' + str(link).replace('https://withhive.me/313/', '').replace('http://withhive.me/313/', '').replace(')', '').replace('(', ''), os.environ["discord_unicorn_webhook"])
