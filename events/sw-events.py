@@ -14,6 +14,33 @@ import mmap
 import sys
 import http.client
 
+def tail( f, lines=20 ):
+    total_lines_wanted = lines
+
+    BLOCK_SIZE = 1024
+    f.seek(0, 2)
+    block_end_byte = f.tell()
+    lines_to_go = total_lines_wanted
+    block_number = -1
+    blocks = [] # blocks of size BLOCK_SIZE, in reverse order starting
+                # from the end of the file
+    while lines_to_go > 0 and block_end_byte > 0:
+        if (block_end_byte - BLOCK_SIZE > 0):
+            # read the last block we haven't yet read
+            f.seek(block_number*BLOCK_SIZE, 2)
+            blocks.append(f.read(BLOCK_SIZE))
+        else:
+            # file too small, start from begining
+            f.seek(0,0)
+            # only read what was not read
+            blocks.append(f.read(block_end_byte))
+        lines_found = blocks[-1].count('\n')
+        lines_to_go -= lines_found
+        block_end_byte -= BLOCK_SIZE
+        block_number -= 1
+    all_read_text = ''.join(reversed(blocks))
+    return '\n'.join(all_read_text.splitlines()[-total_lines_wanted:])
+
 
 def upload_file(file_name, bucket, object_name=None):
     """Upload a file to an S3 bucket
@@ -163,44 +190,44 @@ for link in soup.find_all('a'):
 
 # eventCount = 0
 
-# try:
-#     boto3.client('s3').download_file(os.environ['bucket'], 'history_events__23456765432.txt', '/tmp/history_events__23456765432.txt')
-# except:
-#     f = open('/tmp/history_events__23456765432.txt', 'w') # to clear the file
-#     f.write('NEW')
-#     f.close()
+try:
+    boto3.client('s3').download_file(os.environ['bucket'], 'history_events__23456765432.txt', '/tmp/history_events__23456765432.txt')
+except:
+    f = open('/tmp/history_events__23456765432.txt', 'w') # to clear the file
+    f.write('NEW')
+    f.close()
 
 
-# f = open('/tmp/history_events__23456765432.txt', "a+")
+f = open('/tmp/history_events__23456765432.txt', "a+")
 
-# with open('/tmp/history_events__23456765432.txt', 'rb', 0) as file, mmap.mmap(file.fileno(), 0, access=mmap.ACCESS_READ) as s:
-    
+messageCount = 0
+with open('/tmp/history_events__23456765432.txt', 'rb', 0) as file, mmap.mmap(file.fileno(), 0, access=mmap.ACCESS_READ) as s:
+    for event in eventLinks:
+        if s.find(bytes(event.link, encoding='utf-8')) != -1:
+            print('true ' + event)
+        else:
+            print('false ' + event)
 
-# if eventCount > 0:
-#     for event in eventLinks
-#     sendDiscord('@everyone v\'la un nouvel event tout neuf ! :-)', os.environ["discord_aldanet_webhook"])
-#     #sendDiscord('@here v\'la un nouvel event tout neuf ! :-)', os.environ["discord_unicorn_webhook"])
+            sendDiscord('Nouvel event : ' + str(event.title) + ' // ' + str(event.link), os.environ["discord_aldanet_webhook"])
+            # sendDiscord('Nouveau code : ' + str(link) + ' // Code OldSchool : ' + str(link).replace('https://withhive.me/313/', '').replace('http://withhive.me/313/', '').replace(')', '').replace('(', ''), os.environ["discord_unicorn_webhook"])
+            messageCount += 1
+
+            # File append
+            f.write("%s\r\n" % event.link)
 
 
+if messageCount > 0:
+    sendDiscord('@everyone v\'la des events tout neufs ! :-)', os.environ["discord_aldanet_webhook"])
+    # sendDiscord('@here v\'la des codes tout neufs ! :-)', os.environ["discord_unicorn_webhook"])
 
-
-#         messageCount = 0
-
-#         for link in links:
-            
-
-#         if messageCount > 0:
-#             sendDiscord('@everyone v\'la des codes tout neufs ! :-)', os.environ["discord_aldanet_webhook"])
-#             # sendDiscord('@here v\'la des codes tout neufs ! :-)', os.environ["discord_unicorn_webhook"])
-
-#     f.close
-#     f = open('/tmp/history_codes__23456765432.txt', "r")
-#     tailed = tail(f, lines=50)
-#     f.close()
-#     f = open('/tmp/history_codes__23456765432.txt', 'w') # to clear the file
-#     f.write(tailed)
-#     f.close()
-#     upload_file("/tmp/history_codes__23456765432.txt", os.environ['bucket'], "history_codes__23456765432.txt")
+f.close
+f = open('/tmp/history_events__23456765432.txt', "r")
+tailed = tail(f, lines=50)
+f.close()
+f = open('/tmp/history_events__23456765432.txt', 'w') # to clear the file
+f.write(tailed)
+f.close()
+upload_file("/tmp/history_events__23456765432.txt", os.environ['bucket'], "history_events__23456765432.txt")
 
 
 
