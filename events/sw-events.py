@@ -224,7 +224,7 @@ with open('/tmp/history_events__23456765432.txt', 'rb', 0) as file, mmap.mmap(fi
         else:
             print('false ' + event['link'])
             sendDiscord(str(event['title']), 'Nouvel event !', str(event['title']), str(event['link']), os.environ["discord_aldanet_webhook"])
-            # sendDiscord('Nouveau code : ' + str(link) + ' // Code OldSchool : ' + str(link).replace('https://withhive.me/313/', '').replace('http://withhive.me/313/', '').replace(')', '').replace('(', ''), os.environ["discord_unicorn_webhook"])
+            sendDiscord(str(event['title']), 'Nouvel event !', str(event['title']), str(event['link']), os.environ["discord_unicorn_webhook"])
             messageCount += 1
 
             # File append
@@ -233,7 +233,7 @@ with open('/tmp/history_events__23456765432.txt', 'rb', 0) as file, mmap.mmap(fi
 
 if messageCount > 0:
     sendDiscord('', '@everyone', 'v\'la des events tout neufs ! :-)', '', os.environ["discord_aldanet_webhook"])
-    # sendDiscord('@here v\'la des codes tout neufs ! :-)', os.environ["discord_unicorn_webhook"])
+    sendDiscord('', '@here', 'v\'la des events tout neufs ! :-)', '', os.environ["discord_unicorn_webhook"])
 
 f.close
 f = open('/tmp/history_events__23456765432.txt', "r")
