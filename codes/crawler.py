@@ -8,6 +8,10 @@ import mmap
 import sys
 import http.client
 
+import json
+from urllib import request
+from urllib.error import HTTPError
+
 def tail( f, lines=20 ):
     total_lines_wanted = lines
 
@@ -56,28 +60,39 @@ def upload_file(file_name, bucket, object_name=None):
         return False
     return True
 
-def sendDiscord( message, webhook ):
- 
-    # compile the form data (BOUNDARY can be anything)
-    formdata = "------:::BOUNDARY:::\r\nContent-Disposition: form-data; name=\"content\"\r\n\r\n" + message + "\r\n------:::BOUNDARY:::--"
-  
-    # get the connection and make the request
-    connection = http.client.HTTPSConnection("discordapp.com")
+
+def sendDiscord( title, message, message_embeds, url, webhook ):
+    payload = {
+        'content': message,
+        'embeds': [
+            {
+                'title': title,  # Le titre de la carte
+                'description': message_embeds,  # Le corps de la carte
+                'url': url,  # Si vous voulez faire un lien
+            },
+        ]
+    }
+
+    headers = {
+        'Content-Type': 'application/json',
+        'user-agent': 'Mozilla/5.0 (X11; U; Linux i686) Gecko/20071127 Firefox/2.0.0.11'
+    }
+
+    req = request.Request(url=webhook,
+                      data=json.dumps(payload).encode('utf-8'),
+                      headers=headers,
+                      method='POST')
 
     try:
-        connection.request("POST", webhook, formdata, {
-            'content-type': "multipart/form-data; boundary=----:::BOUNDARY:::",
-            'cache-control': "no-cache",
-            })
-    except:
-        pass
-  
-    # get the response
-    response = connection.getresponse()
-    result = response.read()
-  
-    # return back to the calling function with the result
-    return result.decode("utf-8")
+        response = request.urlopen(req)
+        print(response.status)
+        print(response.reason)
+        print(response.headers)
+    except HTTPError as e:
+        print('ERROR')
+        print(e.reason)
+        print(e.hdrs)
+        print(e.file.read())
 
 def crawl(event, context):
     reddit = praw.Reddit(client_id=os.environ['reddit_client_id'],
@@ -154,16 +169,18 @@ def crawl(event, context):
             else:
                 print('false ' + link)
 
-                sendDiscord('Nouveau code : ' + str(link) + ' // Code OldSchool : ' + str(link).replace('https://withhive.me/313/', '').replace('http://withhive.me/313/', '').replace(')', '').replace('(', ''), os.environ["discord_aldanet_webhook"])
-                # sendDiscord('Nouveau code : ' + str(link) + ' // Code OldSchool : ' + str(link).replace('https://withhive.me/313/', '').replace('http://withhive.me/313/', '').replace(')', '').replace('(', ''), os.environ["discord_unicorn_webhook"])
+                oldschoolCode=str(link).replace('https://withhive.me/313/', '').replace('http://withhive.me/313/', '').replace(')', '').replace('(', '')
+
+                sendDiscord('iOS Link', 'Nouveau code !', oldschoolCode, str(link), os.environ["discord_aldanet_webhook"])
+                sendDiscord('iOS Link', 'Nouveau code !', oldschoolCode, str(link), os.environ["discord_unicorn_webhook"])
                 messageCount += 1
 
                 # File append
                 f.write("%s\r\n" % link)
 
         if messageCount > 0:
-            sendDiscord('@everyone v\'la des codes tout neufs ! :-)', os.environ["discord_aldanet_webhook"])
-            # sendDiscord('@here v\'la des codes tout neufs ! :-)', os.environ["discord_unicorn_webhook"])
+            sendDiscord('', '@everyone', 'v\'la des codes tout neufs ! :-)', '', os.environ["discord_aldanet_webhook"])
+            sendDiscord('', '@here', 'v\'la des codes tout neufs ! :-)', '', os.environ["discord_unicorn_webhook"])
 
     f.close
     f = open('/tmp/history_codes__23456765432.txt', "r")

@@ -8,7 +8,7 @@ provider:
   runtime: python3.7
   stage: prod
   region: eu-west-1
-  memorySize: 128M
+  memorySize: 128
   timeout: 60
 
   iamRoleStatements:
@@ -28,6 +28,7 @@ provider:
 
 functions:
   crawl:
+    memorySize: 128
     handler: crawler.crawl
     events:
        - schedule: cron(*/15 * * * ? *)
