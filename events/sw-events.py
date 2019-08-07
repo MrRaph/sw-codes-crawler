@@ -182,7 +182,7 @@ for link in soup.find_all('a'):
                 soupEvent = BeautifulSoup.BeautifulSoup(r.content, 'lxml')
                 embeded += str(soupEvent.find_all('div', class_='notice_view')[0])
 
-                eventLinks.append({"title": soupEvent.title.string, "link": 'https://www.withhive.com' + link['href']})
+                eventLinks.append({"title": str(soupEvent.find_all('h3', class_='title')[0]), "link": 'https://www.withhive.com' + link['href']})
 
                 # sendDiscord('Nouvel event : https://wwww.withhive.com' + str(link['href']), os.environ["discord_aldanet_webhook"])
                 # sendDiscord('Nouvel event : ' + str(link), os.environ["discord_unicorn_webhook"])
@@ -208,7 +208,7 @@ with open('/tmp/history_events__23456765432.txt', 'rb', 0) as file, mmap.mmap(fi
         else:
             print('false ' + event['link'])
 
-            sendDiscord('Nouvel event : ' + str(event['title']) + ' // ' + str(event['link']), os.environ["discord_aldanet_webhook"])
+            sendDiscord('Nouvel event : ' + str(event['title']) + ' \n ' + str(event['link']), os.environ["discord_aldanet_webhook"])
             # sendDiscord('Nouveau code : ' + str(link) + ' // Code OldSchool : ' + str(link).replace('https://withhive.me/313/', '').replace('http://withhive.me/313/', '').replace(')', '').replace('(', ''), os.environ["discord_unicorn_webhook"])
             messageCount += 1
 
