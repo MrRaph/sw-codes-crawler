@@ -22,3 +22,4 @@ var/
 .serverless
 
 config.json
+env.vars
