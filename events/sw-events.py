@@ -6,6 +6,30 @@ import re
 import requests
 import bs4 as BeautifulSoup
 
+
+def sendDiscord( message, webhook ):
+ 
+    # compile the form data (BOUNDARY can be anything)
+    formdata = "------:::BOUNDARY:::\r\nContent-Disposition: form-data; name=\"content\"\r\n\r\n" + message + "\r\n------:::BOUNDARY:::--"
+  
+    # get the connection and make the request
+    connection = http.client.HTTPSConnection("discordapp.com")
+
+    try:
+        connection.request("POST", webhook, formdata, {
+            'content-type': "multipart/form-data; boundary=----:::BOUNDARY:::",
+            'cache-control': "no-cache",
+            })
+    except:
+        pass
+  
+    # get the response
+    response = connection.getresponse()
+    result = response.read()
+  
+    # return back to the calling function with the result
+    return result.decode("utf-8")
+
 chrome_options = Options()
 chrome_options.add_argument('--headless')
 chrome_options.add_argument('--no-sandbox')
@@ -88,14 +112,28 @@ embeded += '<head><style type="text/css">@charset "UTF-8";[ng\:cloak],[ng-cloak]
         '    '\
         '</head><body><br /><br /><center><div style="width: 75%;">'\
 
+eventCount = 0
 
 for link in soup.find_all('a'):
 	if '/help/notice_view/' in link.get('href') and 'Event' in str(link):
 		if 'ummoner' in str(link):
-                    # urls = re.findall('https://www.withhive.com(?:[-\w.]|(?:%[\da-fA-F]{2}))+', url)
-                    r = requests.get('https://www.withhive.com' + link['href'])
-                    soupEvent = BeautifulSoup.BeautifulSoup(r.content, 'lxml')
-                    embeded += str(soupEvent.find_all('div', class_='notice_view')[0])
+            # urls = re.findall('https://www.withhive.com(?:[-\w.]|(?:%[\da-fA-F]{2}))+', url)
+            r = requests.get('https://www.withhive.com' + link['href'])
+
+            print(link['href'])
+
+            soupEvent = BeautifulSoup.BeautifulSoup(r.content, 'lxml')
+            embeded += str(soupEvent.find_all('div', class_='notice_view')[0])
+
+            eventCount +=1
+            sendDiscord('Nouvel event : ' + str(link), os.environ["discord_aldanet_webhook"])
+            # sendDiscord('Nouvel event : ' + str(link), os.environ["discord_unicorn_webhook"])
+
+if eventCount > 0:
+    sendDiscord('@everyone v\'la un nouvel event tout neuf ! :-)' + str(link), os.environ["discord_aldanet_webhook"])
+    # sendDiscord('Nouvel event : ' + str(link), os.environ["discord_unicorn_webhook"])
+
+                    
 
 
 embeded += '</div></center></body></html>'

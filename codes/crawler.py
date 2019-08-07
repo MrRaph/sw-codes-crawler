@@ -153,12 +153,9 @@ def crawl(event, context):
                 print('true ' + link)
             else:
                 print('false ' + link)
-                 # SNS Notify
-                #sns = boto3.client('sns', region_name='eu-west-1')
-                #sns.publish(PhoneNumber=os.environ['target_arn'], Message=str(link), Subject='New SW Code')
 
-                sendDiscord('Nouveau code : ' + str(link), os.environ["discord_aldanet_webhook"])
-                sendDiscord('Nouveau code : ' + str(link), os.environ["discord_unicorn_webhook"])
+                sendDiscord('Nouveau code : ' + str(link) + ' // Code OldSchool : ' + str(link).replace('https://withhive.me/313/', '').replace('http://withhive.me/313/', '').replace(')', '').replace('(', ''), os.environ["discord_aldanet_webhook"])
+                # sendDiscord('Nouveau code : ' + str(link) + ' // Code OldSchool : ' + str(link).replace('https://withhive.me/313/', '').replace('http://withhive.me/313/', '').replace(')', '').replace('(', ''), os.environ["discord_unicorn_webhook"])
                 messageCount += 1
 
                 # File append
@@ -166,7 +163,7 @@ def crawl(event, context):
 
         if messageCount > 0:
             sendDiscord('@everyone v\'la des codes tout neufs ! :-)', os.environ["discord_aldanet_webhook"])
-            sendDiscord('@here v\'la des codes tout neufs ! :-)', os.environ["discord_unicorn_webhook"])
+            # sendDiscord('@here v\'la des codes tout neufs ! :-)', os.environ["discord_unicorn_webhook"])
 
     f.close
     f = open('/tmp/history_codes__23456765432.txt', "r")
