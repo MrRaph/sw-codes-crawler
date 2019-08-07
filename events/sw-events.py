@@ -2,6 +2,9 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 
+import boto3
+from botocore.exceptions import ClientError
+
 import re
 import os
 import requests
@@ -10,6 +13,28 @@ import bs4 as BeautifulSoup
 import mmap
 import sys
 import http.client
+
+
+def upload_file(file_name, bucket, object_name=None):
+    """Upload a file to an S3 bucket
+
+    :param file_name: File to upload
+    :param bucket: Bucket to upload to
+    :param object_name: S3 object name. If not specified then file_name is used
+    :return: True if file was uploaded, else False
+    """
+
+    # If S3 object_name was not specified, use file_name
+    if object_name is None:
+        object_name = file_name
+
+    # Upload the file
+    s3_client = boto3.client('s3')
+    try:
+        response = s3_client.upload_file(file_name, bucket, object_name, ExtraArgs={"ACL": "public-read", 'ContentType': "text/html"})
+    except ClientError:
+        return False
+    return True
 
 
 def sendDiscord( message, webhook ):
@@ -117,11 +142,11 @@ embeded += '<head><style type="text/css">@charset "UTF-8";[ng\:cloak],[ng-cloak]
         '    '\
         '</head><body><br /><br /><center><div style="width: 75%;">'\
 
-eventCount = 0
+eventLinks = []
 
 for link in soup.find_all('a'):
-	if '/help/notice_view/' in link.get('href') and 'Event' in str(link):
-              if 'ummoner' in str(link):
+    if '/help/notice_view/' in link.get('href') and 'Event' in str(link):
+            if 'ummoner' in str(link):
                 # urls = re.findall('https://www.withhive.com(?:[-\w.]|(?:%[\da-fA-F]{2}))+', url)
                 r = requests.get('https://www.withhive.com' + link['href'])
 
@@ -130,15 +155,53 @@ for link in soup.find_all('a'):
                 soupEvent = BeautifulSoup.BeautifulSoup(r.content, 'lxml')
                 embeded += str(soupEvent.find_all('div', class_='notice_view')[0])
 
-                eventCount +=1
-                sendDiscord('Nouvel event : https://wwww.withhive.com' + str(link['href']), os.environ["discord_aldanet_webhook"])
+                eventLinks.append({"title": soupEvent.title.string, "link": 'https://www.withhive.com' + link['href']})
+
+                # sendDiscord('Nouvel event : https://wwww.withhive.com' + str(link['href']), os.environ["discord_aldanet_webhook"])
                 # sendDiscord('Nouvel event : ' + str(link), os.environ["discord_unicorn_webhook"])
 
-if eventCount > 0:
-    sendDiscord('@everyone v\'la un nouvel event tout neuf ! :-)', os.environ["discord_aldanet_webhook"])
-    #sendDiscord('@here v\'la un nouvel event tout neuf ! :-)', os.environ["discord_unicorn_webhook"])
 
-                    
+# eventCount = 0
+
+# try:
+#     boto3.client('s3').download_file(os.environ['bucket'], 'history_events__23456765432.txt', '/tmp/history_events__23456765432.txt')
+# except:
+#     f = open('/tmp/history_events__23456765432.txt', 'w') # to clear the file
+#     f.write('NEW')
+#     f.close()
+
+
+# f = open('/tmp/history_events__23456765432.txt', "a+")
+
+# with open('/tmp/history_events__23456765432.txt', 'rb', 0) as file, mmap.mmap(file.fileno(), 0, access=mmap.ACCESS_READ) as s:
+    
+
+# if eventCount > 0:
+#     for event in eventLinks
+#     sendDiscord('@everyone v\'la un nouvel event tout neuf ! :-)', os.environ["discord_aldanet_webhook"])
+#     #sendDiscord('@here v\'la un nouvel event tout neuf ! :-)', os.environ["discord_unicorn_webhook"])
+
+
+
+
+#         messageCount = 0
+
+#         for link in links:
+            
+
+#         if messageCount > 0:
+#             sendDiscord('@everyone v\'la des codes tout neufs ! :-)', os.environ["discord_aldanet_webhook"])
+#             # sendDiscord('@here v\'la des codes tout neufs ! :-)', os.environ["discord_unicorn_webhook"])
+
+#     f.close
+#     f = open('/tmp/history_codes__23456765432.txt', "r")
+#     tailed = tail(f, lines=50)
+#     f.close()
+#     f = open('/tmp/history_codes__23456765432.txt', 'w') # to clear the file
+#     f.write(tailed)
+#     f.close()
+#     upload_file("/tmp/history_codes__23456765432.txt", os.environ['bucket'], "history_codes__23456765432.txt")
+
 
 
 embeded += '</div></center></body></html>'
