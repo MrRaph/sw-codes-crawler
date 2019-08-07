@@ -182,7 +182,7 @@ for link in soup.find_all('a'):
                 soupEvent = BeautifulSoup.BeautifulSoup(r.content, 'lxml')
                 embeded += str(soupEvent.find_all('div', class_='notice_view')[0])
 
-                eventLinks.append({"title": soupevent['title'].string, "link": 'https://www.withhive.com' + link['href']})
+                eventLinks.append({"title": soupEvent.title.string, "link": 'https://www.withhive.com' + link['href']})
 
                 # sendDiscord('Nouvel event : https://wwww.withhive.com' + str(link['href']), os.environ["discord_aldanet_webhook"])
                 # sendDiscord('Nouvel event : ' + str(link), os.environ["discord_unicorn_webhook"])
