@@ -164,29 +164,37 @@ def crawl(event, context):
         messageCount = 0
 
         for link in links:
-            if s.find(bytes(link, encoding='utf-8')) != -1:
-                print('true ' + link)
-            else:
-                print('false ' + link)
+            for string in link.split('http'):
+                string = 'http' + string.lower()
+                if string != '':
+                    if s.find(bytes(string, encoding='utf-8')) != -1:
+                        print('true ' + string)
+                    else:
+                        print('false ' + string)
 
-                oldschoolCode=str(link).replace('https://withhive.me/313/', '').replace('http://withhive.me/313/', '').replace(')', '').replace('(', '')
+                        oldschoolCode=str(string).replace('https://withhive.me/313/', '').replace('http://withhive.me/313/', '').replace(')', '').replace('(', '').replace('[', '').replace(']', '')
 
-                sendDiscord('iOS Link', 'Nouveau code !', oldschoolCode, str(link), os.environ["discord_aldanet_webhook"])
-                sendDiscord('iOS Link', 'Nouveau code !', oldschoolCode, str(link), os.environ["discord_unicorn_webhook"])
-                messageCount += 1
+                        print('0')
+                        sendDiscord('iOS Link', 'Nouveau code !', oldschoolCode, str(string), os.environ["discord_aldanet_webhook"])
+                        # sendDiscord('iOS Link', 'Nouveau code !', oldschoolCode, str(string), os.environ["discord_unicorn_webhook"])
+                        messageCount += 1
 
-                # File append
-                f.write("%s\r\n" % link)
+                        # File append
+                        f.write("%s\r\n" % string)
 
         if messageCount > 0:
             sendDiscord('', '@everyone', 'v\'la des codes tout neufs ! :-)', '', os.environ["discord_aldanet_webhook"])
-            sendDiscord('', '@here', 'v\'la des codes tout neufs ! :-)', '', os.environ["discord_unicorn_webhook"])
+            # sendDiscord('', '@here', 'v\'la des codes tout neufs ! :-)', '', os.environ["discord_unicorn_webhook"])
 
     f.close
     f = open('/tmp/history_codes__23456765432.txt', "r")
+    print('1')
     tailed = tail(f, lines=50)
+    print('2')
     f.close()
     f = open('/tmp/history_codes__23456765432.txt', 'w') # to clear the file
+
+    print('3')
     f.write(tailed)
     f.close()
     upload_file("/tmp/history_codes__23456765432.txt", os.environ['bucket'], "history_codes__23456765432.txt")
