@@ -104,7 +104,7 @@ def crawl(event, context):
     embededList = []
     links = []
 
-    for submission in subreddit.search("withhive.me", sort='recent', time_filter='week', limit=20):
+    for submission in subreddit.search("withhive.me", sort='recent', time_filter='day', limit=20):
         if 'withhive.me/313/' in submission.selftext:
 
             embededList.append('<blockquote class="reddit-card" data-card-created="'+ str(time.time()).split(':')[0] +'">'\
